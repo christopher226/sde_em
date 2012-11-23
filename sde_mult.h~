@@ -1,0 +1,29 @@
+#include <gsl/gsl_vector.h>
+
+class SDE
+{
+ public:
+  /*constructor*/
+  SDE(
+      gsl_vector (*v0)(gsl_vector),
+      gsl_vector (*v1)(gsl_vector),
+      void *
+      );
+  
+  /*methods to simulate the SDE*/
+  void simulate_one_step();
+  void simulate_one_chain();
+  void simulate_chanis();
+  
+ private:
+  
+  /*parameters of SDE*/
+  vector<double> (*V[3])(vector<double>);
+  void* params;
+  
+  /*methods to simulate Wiener process*/
+  double Uniform(void);
+  double Normal(void);
+  double MultivariateNormal(int);  
+};
+

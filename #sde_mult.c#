@@ -1,0 +1,15 @@
+#include <stdio.h>
+#include "sde_mult.h"
+
+
+vector<double> ah_v0(vector<double> y)
+{
+  return y;
+}
+
+
+
+int main(void)
+{
+  
+}

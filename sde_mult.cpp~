@@ -1,0 +1,33 @@
+#include "sde_mult.h"
+#include <math.h>
+void SDE::SDE(
+	      void (*v0)(gsl_vector),
+	      void (*v1)(gsl_vector),
+	      void *params_setting 
+	      )
+{
+  V[0]=v0;
+  V[1]=v1;
+  params=params_setting;
+}
+
+
+void SDE::simulate_one_step()
+{
+}
+
+void SDE::simulate_one_chain()
+{
+}
+
+void SDE::simulate_chains()
+{
+}
+
+void ah_v0(gsl_vector *y)
+{
+}
+
+void ah_v1(gsl_vector *y)
+{
+}
