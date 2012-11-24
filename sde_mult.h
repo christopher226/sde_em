@@ -1,4 +1,6 @@
 #include <gsl/gsl_vector.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 class SDE
 {
@@ -18,7 +20,9 @@ class SDE
   void simulate_one_chain(gsl_vector *tmp_y,
 			  int step_n,
 			  double T);
-  void simulate_chains(int sample_size,
+  void simulate_chains(
+		       gsl_vector *init_y,
+		       int sample_size,
 		       int step_n,
 		       double T);
   
@@ -28,6 +32,9 @@ class SDE
   void (*V[3])(gsl_vector *,void *);
   void *sde_params;
   int dim;
+
+  /*parameters of gaussian noise*/
+  gsl_rng *r;  
 
   void set_gaussian_noise(gsl_vector *y);
   
