@@ -81,18 +81,18 @@ void SDE::simulate_one_step(
 void SDE::simulate_one_chain(
 			     gsl_vector *tmp_y,
 			     int step_n,
-			     double T
+			     double t
 			     )
 {
   double step_w;
-  step_w=T/step_n;
-
+  step_w=t/step_n;
+  
   int i=0;
   for(i=0;i<step_n;i++)
     {
       simulate_one_step(tmp_y,step_w);
-      printf("%dth y\n",i);
-      gsl_vector_fprintf(stdout,tmp_y,"%E");
+      //printf("%dth y\n",i);
+      //gsl_vector_fprintf(stdout,tmp_y,"%E");
     }  
 }
 
@@ -100,15 +100,12 @@ void SDE::simulate_chains(
 			  gsl_vector *init_y,
 			  int sample_size,
 			  int step_n,
-			  double T
+			  double t
 			  )
 {
   /*vector to sum up*/
   gsl_vector *sum_y = gsl_vector_alloc(dim);
   gsl_vector_set_all(sum_y,0);
-
-  printf("Maturity:%d",T);
-  printf("step_width:%d",T/step_n);
 
   int i =0;
   
@@ -116,7 +113,7 @@ void SDE::simulate_chains(
     {
       gsl_vector *tmp_y = gsl_vector_alloc(dim);
       gsl_vector_memcpy(tmp_y,init_y);
-      simulate_one_chain(tmp_y,step_n,T);
+      simulate_one_chain(tmp_y,step_n,t);
       /*for test*/
       //printf("%dth y\n",i);
       //gsl_vector_fprintf(stdout,tmp_y,"%E");
@@ -125,10 +122,7 @@ void SDE::simulate_chains(
       gsl_vector_free(tmp_y);
     }
   gsl_vector_scale(sum_y,1.0/sample_size);
-  //gsl_vector_scale(sum_y);
-  printf("total");
-  gsl_vector_fprintf(stdout,sum_y,"%E");
-  
+  gsl_vector_memcpy(init_y,sum_y);  
   gsl_vector_free(sum_y);
 }
 
@@ -212,12 +206,31 @@ void ah_v2(gsl_vector *y,void *params)
 
 int main(void)
 {
+
   struct ah_params_s ah_params;
-  ah_params.mu=1.12;
+  ah_params.mu=0.03;
   ah_params.alpha=1.21;
   ah_params.theta=0.34;
   ah_params.beta=0.944;
   ah_params.rho=0.421;
+
+  double t=5; //maturity
+  int sample_size=1000; // number of chains
+  int step_n=1000; // number of steps in a chain
+  
+  printf("<<Status>>\n");
+  printf("<SimulationStatus>\n");
+  printf("T:%f\n",t);
+  printf("#ofStepsInOneChain:%d\n",step_n);
+  printf("SampleSize:%d\n",sample_size);
+
+  printf("<ParameterStatus>\n");
+  printf("mu:%f\n",ah_params.mu);
+  printf("alpha:%f\n",ah_params.alpha);
+  printf("theta:%f\n",ah_params.theta);
+  printf("beta:%f\n",ah_params.beta);
+  printf("rho:%f\n",ah_params.rho);
+  
   // 1-dimentional vector v1
   vector<vector_field> v1;
   v1.push_back(&ah_v1);
@@ -225,12 +238,17 @@ int main(void)
   
   SDE ah(3,&ah_v0,v1,&ah_params);
   gsl_vector *init_y = gsl_vector_alloc(3);
-  printf("start");
-  
+
   gsl_vector_set(init_y,0,100);
-  gsl_vector_set(init_y,1,0.21);
+  gsl_vector_set(init_y,1,0.05);
   gsl_vector_set(init_y,2,0);
-  ah.simulate_chains(init_y,100,100,1);
+
+  ah.simulate_chains(init_y,sample_size,step_n,t);
+  printf("<<Result(AverageOfSamples)>>\n");
+  printf("Price(at T)=%f\n",gsl_vector_get(init_y,0));
+  printf("Volatility(at T)=%f\n",gsl_vector_get(init_y,1));
+  printf("AveragePrice(throughout the term)=%f\n",gsl_vector_get(init_y,2)/t);
+
   gsl_vector_free(init_y);
-  
+
 }
