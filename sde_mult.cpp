@@ -150,7 +150,7 @@ struct ah_params_s
 
 // vector[0]=S(t)=StockPrice
 // vector[1]=V(t)=Volatility
-// vector[2]=OptionPrice
+// vector[2]=AveragePrice
 
 // mu:return
 // alpha:tense of regression
@@ -217,12 +217,14 @@ int main(void)
   double t=5; //maturity
   int sample_size=1000; // number of chains
   int step_n=1000; // number of steps in a chain
+  double strike_price=120;
   
   printf("<<Status>>\n");
   printf("<SimulationStatus>\n");
   printf("T:%f\n",t);
   printf("#ofStepsInOneChain:%d\n",step_n);
   printf("SampleSize:%d\n",sample_size);
+  printf("StrikePrice:%f\n",strike_price);
 
   printf("<ParameterStatus>\n");
   printf("mu:%f\n",ah_params.mu);
@@ -243,12 +245,26 @@ int main(void)
   gsl_vector_set(init_y,1,0.05);
   gsl_vector_set(init_y,2,0);
 
+  int i;
+  double sum=0;
+  //calculating option price
+  for(i=0;i<sample_size;i++)
+    {
+      gsl_vector *init_y_i_th = gsl_vector_alloc(3);
+      gsl_vector_memcpy(init_y_i_th,init_y);      
+      //simulate one chain      
+      ah.simulate_chains(init_y_i_th,1,step_n,t);  
+      // calculating the payoff
+      sum += max(gsl_vector_get(init_y_i_th,2)/t-strike_price,0.0);
+      gsl_vector_free(init_y_i_th);
+    }
+
   ah.simulate_chains(init_y,sample_size,step_n,t);
   printf("<<Result(AverageOfSamples)>>\n");
   printf("Price(at T)=%f\n",gsl_vector_get(init_y,0));
   printf("Volatility(at T)=%f\n",gsl_vector_get(init_y,1));
   printf("AveragePrice(throughout the term)=%f\n",gsl_vector_get(init_y,2)/t);
-
+  printf("AsianPriceCallOption:%f\n",sum/sample_size);  
   gsl_vector_free(init_y);
 
 }
