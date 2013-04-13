@@ -1,13 +1,1 @@
-SDEのオイラー丸山近似
-
-使い方
-
-int main(void)
-{
-  struct ah_params_s ah_params;
-  ah_params.alpha=1;
-  ah_params.theta=1;
-  SDE ah(1,&ah_v0,&ah_v1,&ah_params);
-}
- 
-
+多次元空間上で定義され、拡散項が多次元正規分布のSDE(確率微分方程式)をオイラー丸山法で弱近似するプログラム。使用例ではアジアンオプションの計算を行なっています。
